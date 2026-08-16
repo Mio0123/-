@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>イラストお題ルーレット</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .container {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    width: 100%;
+    max-width: 520px;
+  }
+  h1 {
+    font-size: 1.4rem;
+    text-align: center;
+    margin-bottom: 24px;
+    color: #2c3e50;
+  }
+  .result-card {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .label {
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #6c757d;
+    margin-bottom: 4px;
+  }
+  .value {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    min-height: 1.5em;
+    word-break: break-all;
+    line-height: 1.4;
+  }
+  .btn {
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    padding: 14px;
+    background-color: #3b82f6;
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+  }
+  .btn:hover {
+    background-color: #2563eb;
+  }
+  .btn:active {
+    transform: scale(0.98);
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>イラストお題ルーレット</h1>
+  
+  <div class="result-card">
+    <div class="label">1. シチュエーション (表情・ポーズ・構成)</div>
+    <div class="value" id="situation">---</div>
+  </div>
+
+  <div class="result-card">
+    <div class="label">2. イメージカラー</div>
+    <div class="value" id="color">---</div>
+  </div>
+
+  <div class="result-card">
+    <div class="label">3. 性別</div>
+    <div class="value" id="gender">---</div>
+  </div>
+
+  <div class="result-card">
+    <div class="label">4. 年齢</div>
+    <div class="value" id="age">---</div>
+  </div>
+
+  <button class="btn" id="spinBtn" onclick="toggleRoulette()">スタート</button>
+</div>
+
+<script>
+const data = {
+  situations: [
+    "雨宿りで肩が触れ合う瞬間（俯瞰構図 / 照れた表情）",
+    "朝起きて欠伸をしながら目をこする（あおり構図 / 無防備なポーズ）",
+    "こちらを睨みつけながら手を伸ばす（正面構図 / 手前パース強調）",
+    "夕暮れ時に振り返って優しく微笑む（逆光構図 / なびく髪）",
+    "待ち合わせに遅刻して息を切らせて駆け込む（斜め構図 / 焦り顔）",
+    "読書に没頭して周りの声が届いていない（横顔構図 / 静かな表情）",
+    "大好物のスイーツを頬張って満足気（寄りの構図 / 崩れた笑顔）",
+    "スマホを見ながら思わずニヤけている（下からの煽り光 / 油断した表情）",
+    "風で帽子を押さえながら遠くを見つめる（広角構図 / 凛としたポーズ）",
+    "武器や道具を構えて決めポーズ（対角線構図 / 真剣な目つき）",
+    "机に突っ伏して眠気に耐えている（近接構図 / まどろんだ目）",
+    "レンズ（カメラ）越しにこちらを指差し笑う（正面構図 / 動きのあるポーズ）",
+    "誰かの服の袖をつまんで引き止める（引きの構図 / 切ない表情）",
+    "鏡の前で身だしなみを整えている（鏡越し構図 / 真剣な眼差し）",
+    "暗闇の中で懐中電灯の光を下から浴びる（ドラマチックな明暗 / 驚き顔）",
+    "温かい飲み物を両手で抱えて息を吹きかける（クローズアップ / 和らぐ表情）",
+    "雨に濡れながら空を見上げる（真上からの俯瞰 / 諦めや解放の表情）",
+    "ポケットに手を突っ込んで壁にもたれかかる（サイド光 / 怠惰・アンニュイ）",
+    "水中で静かに沈んでいく・揺らめく（魚眼パース / 幻想的なポーズ）",
+    "靴紐を結び直すために屈み込む（ローアングル / 集中した横顔）",
+    "イヤホンの片方を差し出してくる（広角斜め構図 / 挑発的または誘う笑顔）",
+    "背中合わせに座って静かに会話している（シンメトリー構図 / 落ち着いた表情）",
+    "ネクタイや首元を少し緩める（斜めアップ / 色気のある表情）",
+    "高所に座って脚をぶらつかせている（高度感のある俯瞰 / 余裕な笑み）",
+    "髪を後ろで一つに結び束ねる瞬間（脇や首筋が見えるポーズ / 真剣な顔）",
+    "プレゼントを後ろに隠してニヤリと笑う（トリミング構図 / いたずらっぽい顔）",
+    "窓ガラスに指で落書きをしている（ガラス越し構図 / 儚げな表情）",
+    "大雨の中で傘を差さずに立ち尽くす（遠景構図 / 感情の抜けた表情）",
+    "ヘッドホンを耳から少し外して問いかける（ナナメアングル / 疑問の表情）",
+    "戦闘やアクシデントで服が乱れ警戒している（ローアングル / 鋭い視線）",
+    "猫や小動物を抱きしめて頬をすり寄せる（柔らかい光 / 満面の笑み）",
+    "唇に指を当てて「内緒」のポーズ（アップ構図 / 魅惑的な笑顔）",
+    "夕日を背にして手をかざし眩しがる（強烈な逆光 / 目を細めた表情）",
+    "階段に腰かけて頬づえをつく（スナップショット風 / ぼんやりした目線）",
+    "指で作ったフレーム越しにこちらを覗く（パース強調 / お茶目な表情）",
+    "本棚の隙間からこちらと目が合う（フレームインフレーム / 驚いた表情）",
+    "口元を手で覆って爆笑している（動きの残像 / くしゃっとした笑顔）",
+    "光の差し込む部屋で毛布に包まる（逆光ハイキー / 眠たげな表情）",
+    "ダンスの一瞬を切り取った躍動的な躍進（S字ラインポーズ / 迫力ある表情）",
+    "涙を拭うフリをして強がる（斜め俯瞰 / 悔しそうな微笑み）"
+  ],
+  colors: [
+    "赤（レッド）", "青（ブルー）", "緑（グリーン）", "黄（イエロー）",
+    "紫（パープル）", "ピンク", "オレンジ", "黒（ブラック）",
+    "白（ホワイト）", "水色（シアン）", "茶色（ブラウン）",
+    "ミントグリーン", "ラベンダー", "ゴールド", "シルバー",
+    "ワインレッド", "ネイビー", "ターコイズ", "サーモンピンク",
+    "オリーブ", "マスタード", "チャコールグレー", "ベージュ",
+    "マゼンタ", "エメラルドグリーン", "テラコッタ", "アイボリー"
+  ],
+  genders: ["男性", "女性", "中性・不詳"]
+};
+
+let timerId = null;
+let isSpinning = false;
+
+// 4歳〜39歳を均等な確率で網羅して一括生成
+function getRandomAge() {
+  const min = 4;
+  const max = 39;
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function getRandomItem(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function updateRoulette() {
+  document.getElementById("situation").textContent = getRandomItem(data.situations);
+  document.getElementById("color").textContent = getRandomItem(data.colors);
+  document.getElementById("gender").textContent = getRandomItem(data.genders);
+  document.getElementById("age").textContent = getRandomAge() + "歳";
+}
+
+function toggleRoulette() {
+  const btn = document.getElementById("spinBtn");
+  
+  if (isSpinning) {
+    clearInterval(timerId);
+    isSpinning = false;
+    btn.textContent = "スタート";
+    btn.style.backgroundColor = "#3b82f6";
+  } else {
+    isSpinning = true;
+    btn.textContent = "ストップ";
+    btn.style.backgroundColor = "#ef4444";
+    timerId = setInterval(updateRoulette, 50);
+  }
+}
+</script>
+
+</body>
+</html>
